@@ -140,18 +140,35 @@ def search_data():
             with col1:
                 Map.to_streamlit()
 
+def nbr ():
+    Map = geemap.Map()
 
+    if "ee_assets" not in st.session_state:
+        st.session_state["ee_assets"] = None
+    if "asset_titles" not in st.session_state:
+        st.session_state["asset_titles"] = None
+    try:
+        CMIimg = ee.ImageCollection("NOAA/GOES/17/MCMIPF").filter(ee.Filter.date('2022-07-01', '2022-07-02'))\
+                        .filter(ee.Filter.calendarRange(17, 21, 'hour')).first()
+        NBRimg = CMIimg.normalizedDifference(['CMI_C03', 'CMI_C06']).toFloat().rename('NBR')
+        Map.addLayer(NBRimg, { 'min': -0.7,'max': 0.4,'palette': ['red', 'orange','yellow','green']}, 'NBR)
+    except Exception as e:
+        st.error(f"Error adding layer: {e}")
+    
 def app():
     st.title("Earth Engine Data Catalog")
 
     apps = ["Search Earth Engine Data Catalog",
-            "National Land Cover Database (NLCD)"]
+            "National Land Cover Database (NLCD)",
+            "Visualize NBR"]
 
     selected_app = st.selectbox("Select an app", apps)
 
     if selected_app == "National Land Cover Database (NLCD)":
         nlcd()
     elif selected_app == "Search Earth Engine Data Catalog":
+        search_data()
+    elif selected_app == "Visualize NBR":
         search_data()
 
 
